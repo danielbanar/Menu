@@ -1,20 +1,41 @@
-// Menu.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
-
-int main()
+#include "menu.h"
+Menu::Menu() : iSelectedElement(INVALID) {}
+void Menu::AddLabel(const std::string& text)
 {
-    std::cout << "Hello World!\n";
+	this->vecElements.push_back(MenuElement(text));
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void Menu::AddCheckBox(const std::string& text, bool state)
+{
+	this->vecElements.push_back(MenuCheckBox(text, state));
+}
+void Menu::CreateBuffer()
+{
+	this->buffer.clear();
+	for (auto it = vecElements.begin(); it != vecElements.end(); it++)
+	{
+		auto i = std::distance(vecElements.begin(), it);
+		if (i == iSelectedElement)
+			buffer += Invert(it->sLabel) + '\n';
+		else
+			buffer += it->sLabel + '\n';
+	}
+}
+void Menu::ManageInput()
+{
+	if (!vecElements.size())
+		return;
+	if (iSelectedElement == INVALID)
+		iSelectedElement = 0;
+	if (GetAsyncKeyState(VK_DOWN) & 1)
+		iSelectedElement++;
+	if (GetAsyncKeyState(VK_UP) & 1)
+		iSelectedElement--;
+	if (iSelectedElement < 0)
+		iSelectedElement = vecElements.size() - 1;
+	else if (iSelectedElement >= vecElements.size())
+		iSelectedElement = 0;
+}
+std::string Invert(std::string& str)
+{
+	return "\033[7m" + str + "\033[0m";
+}
